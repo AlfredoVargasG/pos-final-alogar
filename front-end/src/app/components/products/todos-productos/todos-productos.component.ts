@@ -10,8 +10,12 @@ import { CardProductoComponent } from './card-producto/card-producto.component';
   styleUrls: ['./todos-productos.component.scss'],
 })
 export class TodosProductosComponent {
-  isLoading: boolean = true;
+  isLoadingProducts: boolean = true;
+  isLoadingCategories: boolean = true;
+  view: string = 'categories'; // Vista activa ('categories' o 'products')
+  activeCategory: string = ''; // Categoría activa
   products: any[] = []; // Productos de la página actual
+  categories: any[] = []; // Categorías
   totalProducts: number = 0; // Total de productos (desde el backend)
   pageSize: number = 10; // Productos por página
   page: number = 1; // Página actual
@@ -22,37 +26,54 @@ export class TodosProductosComponent {
   constructor(private apiService: ApiService) { }
 
   ngOnInit(): void {
-    this.getProducts(); // Obtener productos al iniciar
+    this.getCategories(); // Obtener categorías al iniciar
   }
 
   // Método para obtener productos con paginación
-  getProducts() {
-    this.isLoading = true; // Activar el loader
-    this.apiService.getProducts(this.page, this.pageSize).subscribe((res: any) => {
+  getProducts(category: string) {
+    this.isLoadingProducts = true; // Activar el loader
+    this.apiService.getProductsByCategory(category, this.page, this.pageSize, this.orderBy, this.orderDirection).subscribe((res: any) => {
       this.products = res.data;
       this.totalProducts = res.totalCount; // Total de productos
       setTimeout(() => {
-        this.isLoading = false; // Desactivar el loader
+        this.isLoadingProducts = false; // Desactivar el loader
+      }, 1000); // Simular tiempo de carga
+    });
+  }
+
+  // Método para obtener categorías
+  getCategories() {
+    this.isLoadingCategories = true; // Activar el loader
+    this.apiService.getCategories().subscribe((res: any) => {
+      this.categories = res;
+      setTimeout(() => {
+        this.isLoadingCategories = false; // Desactivar el loader
       }, 2000); // Simular tiempo de carga
     });
+  }
+
+  changeView(view: string, category: string) {
+    this.view = view;
+    this.activeCategory = category
+    if (view === 'products') {
+      this.getProducts(category); // Obtener productos de la categoría seleccion
+    }
   }
 
   // Manejar el cambio de página
   onPageChange(newPage: number) {
     this.page = newPage;
-    this.getProducts(); // Obtener productos para la nueva página
+    this.getProducts(this.activeCategory); // Obtener productos para la nueva página
   }
 
   sortProducts(sortBy: string) {
-    this.isLoading = true; // Activar el loader
-    this.orderBy = sortBy; // Cambiar el campo por el que se ordenan los productos
-    this.orderDirection = this.orderDirection === 'asc' ? 'desc' : 'asc'; // Cambiar la dirección de ordenamiento
-    this.apiService.getProductsSorted(this.page, this.pageSize, this.orderBy, this.orderDirection).subscribe((res: any) => {
-      this.products = res.data;
-      setTimeout(() => {
-        this.isLoading = false; // Desactivar el loader
-      }, 2000); // Simular tiempo de carga
-    });
+    if (this.orderBy === sortBy) {
+      this.orderDirection = this.orderDirection === 'asc' ? 'desc' : 'asc';
+    } else {
+      this.orderBy = sortBy;
+      this.orderDirection = 'asc';
+    }
+    this.getProducts(this.activeCategory); // Obtener productos ordenados
   }
 
   onViewChange(view: string): void {
