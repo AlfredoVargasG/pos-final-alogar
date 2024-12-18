@@ -1,0 +1,11 @@
+<div class="card product-card text-bg-dark">
+    <img [src]="producto.image" class="card-img" alt="{{ producto.product }}">
+    <div class="card-img-overlay">
+        <h5 class="card-title">{{ producto.product }}</h5>
+        <p class="card-text">{{ producto.description }}</p>
+        <p class="card-text">
+            <small>Precio: {{ producto.price | currency }}</small>
+        </p>
+        <a [href]="producto.url" target="_blank" class="btn btn-primary btn-sm">Ver Producto</a>
+    </div>
+</div>

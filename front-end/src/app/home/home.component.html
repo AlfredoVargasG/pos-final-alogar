@@ -1,0 +1,35 @@
+<div class="app-container" [ngStyle]="{'display': isLoading ? 'none' : 'block'}">
+  <app-navbar (changeLoading)="getLoading($event)"></app-navbar>
+
+  <div class="container-fluid">
+    <div class="card mb-12">
+      <div class="row">
+        <div class="col-md-2">
+          <h1 class="my-4"></h1>
+          <div class="nav flex-column">
+            <li *ngFor="let page of pages" class="nav-item">
+              <a (click)="changePage(page)" class="nav-link pages" [ngClass]="{ active: page.isActive }">
+                {{ page.title }}
+              </a>
+
+              <a *ngFor="let item of page.items" [ngStyle]="{ display: page.isActive ? 'block' : 'none' }"
+                [ngClass]="{ active: item.isActive }" (click)="changeSubPage(item)" class="nav-link sub-pages">
+                {{ item.title }}
+              </a>
+            </li>
+          </div>
+        </div>
+
+        <div class="col-md-9">
+          <ng-container *ngIf="activeSubPageComponent as currentComponent">
+            <ng-container *ngComponentOutlet="currentComponent"></ng-container>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="loader-container" *ngIf="isLoading">
+  <div class="loader"></div>
+</div>

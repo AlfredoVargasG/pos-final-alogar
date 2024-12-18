@@ -1,0 +1,53 @@
+<!-- product.component.html -->
+<div class="card card-outline-secondary my-4" [ngStyle]="{ 'display': isLoading ? 'none' : 'block' }">
+  <div class="card-header">
+    <h3>Detalles del Producto</h3>
+  </div>
+  <div class="card-body">
+    <form [formGroup]="productForm" (ngSubmit)="onSubmit()">
+      <div class="form-section">
+        <div class="form-group">
+          <label for="productName">Nombre del Producto</label>
+          <input type="text" id="productName" class="form-control" formControlName="product"
+            placeholder="Ingrese el nombre del producto">
+        </div>
+        <div class="form-group">
+          <label for="productPrice">Precio del Producto</label>
+          <input type="number" id="productPrice" class="form-control" formControlName="price"
+            placeholder="Ingrese el precio del producto">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-group">
+          <label for="productUrl">URL del Producto</label>
+          <input type="text" id="productUrl" class="form-control" formControlName="url"
+            placeholder="Ingrese la URL del producto">
+        </div>
+        <div class="form-group">
+          <label for="productImage">Imagen del Producto</label>
+          <input type="file" id="productImage" class="form-control" formControlName="image"
+            (change)="onImageChange($event)" placeholder="Ingrese la imagen del producto">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <div class="form-group">
+          <label for="productCategories">Seleccione las Categorías Pertenecientes</label>
+          <div class="checkbox-group">
+            <label *ngFor="let category of categories">
+              <input type="checkbox" [checked]="category.selected" (change)="onCategoryChange($event, category)">
+              {{ category.category }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <button type="submit" class="btn btn-primary btn-block" [disabled]="productForm.invalid">Agregar Producto</button>
+    </form>
+  </div>
+</div>
+
+<div class="loader-container" [ngStyle]="{ 'display': isLoading ? 'flex' : 'none' }">
+  <div class="loader"></div>
+</div>

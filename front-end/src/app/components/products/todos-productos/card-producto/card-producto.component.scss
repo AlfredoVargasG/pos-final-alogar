@@ -1,0 +1,42 @@
+.product-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 10px;
+    transition: transform 0.3s, box-shadow 0.3s;
+    height: 300px;
+
+    &:hover {
+        transform: scale(1.02);
+        box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .card-img {
+        height: 100%;
+        object-fit: cover;
+        filter: brightness(70%);
+        transition: filter 0.3s;
+    }
+
+    &:hover .card-img {
+        filter: brightness(50%);
+    }
+
+    .card-img-overlay {
+        position: absolute;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.6);
+        color: #fff;
+        padding: 20px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7);
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+
+        .btn {
+            margin-top: 10px;
+        }
+    }
+}

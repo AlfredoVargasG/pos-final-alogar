@@ -1,0 +1,74 @@
+<div class="card card-outline-secondary my-4" [ngStyle]="{ 'display': isLoading ? 'none' : 'block' }">
+    <div class="card-header">
+        Todos los productos
+    </div>
+    <div class="card-body">
+        <div class="search-box"></div>
+
+        <!-- Opciones de vista -->
+        <div class="view-options">
+            <span class="material-icons" (click)="onViewChange('grid_view')"
+                [ngClass]="{ 'active': activeView === 'grid_view' }">
+                grid_view
+            </span>
+            <span class="material-icons" (click)="onViewChange('list')" [ngClass]="{ 'active': activeView === 'list' }">
+                list
+            </span>
+        </div>
+
+        <!-- Vista de cuadrícula -->
+        <div class="grid-products" *ngIf="activeView === 'grid_view'">
+            <div class="product-grid">
+                <app-card-producto *ngFor="let producto of products" [producto]="producto">
+                </app-card-producto>
+            </div>
+        </div>
+
+        <!-- Vista de lista -->
+        <div class="table-products" *ngIf="activeView === 'list'">
+            <table>
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>
+                            <div class="d-flex align-items-center justify-content-between">
+                                Producto
+                                <span class="material-icons" (click)="sortProducts('product')">swap_vert</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex align-items-center justify-content-between">
+                                Precio
+                                <span class="material-icons" (click)="sortProducts('price')">swap_vert</span>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="d-flex align-items-center justify-content-between">
+                                Página web
+                                <span class="material-icons" (click)="sortProducts('url')">swap_vert</span>
+                            </div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let product of products">
+                        <td><img [src]="product.image" alt="Imagen del producto" /></td>
+                        <td>{{ product.product }}</td>
+                        <td>{{ product.price | currency }}</td>
+                        <td><a [href]="product.url" target="_blank">{{ product.url }}</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Paginación -->
+        <ngb-pagination [collectionSize]="totalProducts" [(page)]="page" [pageSize]="pageSize" [maxSize]="5"
+            [rotate]="true" [boundaryLinks]="true" (pageChange)="onPageChange($event)">
+        </ngb-pagination>
+    </div>
+</div>
+
+<!-- Loader mientras se cargan los productos -->
+<div class="loader-container" [ngStyle]="{ 'display': isLoading ? 'flex' : 'none' }">
+    <div class="loader"></div>
+</div>
