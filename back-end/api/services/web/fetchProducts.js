@@ -125,7 +125,7 @@ async function getCategorizedProducts(categories) {
 
 // Función para agrupar los productos por nombre y categorías
 function groupProductsByCategory(products, categorizedProducts) {
-    const groupedProducts = {};
+    let groupedProducts = {};
 
     categorizedProducts.forEach(item => {
         if (!groupedProducts[item.product]) {
@@ -134,10 +134,10 @@ function groupProductsByCategory(products, categorizedProducts) {
                 price: item.price,
                 image: item.image,
                 url: item.url,
-                categories: new Set(),
+                categories_id: new Set(),
             };
         }
-        groupedProducts[item.product].categories.add(item.categoryId);
+        groupedProducts[item.product].categories_id.add(item.categoryId);
     });
 
     products.forEach(item => {
@@ -147,14 +147,19 @@ function groupProductsByCategory(products, categorizedProducts) {
                 price: item.price,
                 image: item.image,
                 url: item.url,
-                categories: new Set([13]),
+                categories_id: new Set([13]),
             };
         }
     });
 
+    groupedProducts = Object.values(groupedProducts).map(product => ({
+        ...product,
+        categories_id: Array.from(product.categories_id),
+    }))
+
     return Object.values(groupedProducts).map(product => ({
         ...product,
-        categories: Array.from(product.categories),
+        category_id: product.categories_id[0],
     }));
 }
 
