@@ -32,8 +32,8 @@ export class ApiService {
     return this.http.get(`${this.url}/products?page=${page}&pageSize=${pageSize}`);
   }
 
-  getProductsByCategory(category: string, page: number, pageSize: number, orderBy: string, orderDirection: string) {
-    return this.http.get(`${this.url}/products/category/${category}?page=${page}&pageSize=${pageSize}&orderBy=${orderBy}&orderDirection=${orderDirection}`);
+  getProductsByCategory(categoryId: number, page: number, pageSize: number, orderBy: string, orderDirection: string) {
+    return this.http.get(`${this.url}/products/category/${categoryId}?page=${page}&pageSize=${pageSize}&orderBy=${orderBy}&orderDirection=${orderDirection}`);
   }
 
   ingresarProducto(producto: any) {

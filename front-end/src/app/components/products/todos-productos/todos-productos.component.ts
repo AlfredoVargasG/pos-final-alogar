@@ -30,9 +30,9 @@ export class TodosProductosComponent {
   }
 
   // Método para obtener productos con paginación
-  getProducts(category: string) {
+  getProducts(category: any) {
     this.isLoadingProducts = true; // Activar el loader
-    this.apiService.getProductsByCategory(category, this.page, this.pageSize, this.orderBy, this.orderDirection).subscribe((res: any) => {
+    this.apiService.getProductsByCategory(category.id, this.page, this.pageSize, this.orderBy, this.orderDirection).subscribe((res: any) => {
       this.products = res.data;
       this.totalProducts = res.totalCount; // Total de productos
       setTimeout(() => {
@@ -52,9 +52,9 @@ export class TodosProductosComponent {
     });
   }
 
-  changeView(view: string, category: string) {
+  changeView(view: string, category: any) {
     this.view = view;
-    this.activeCategory = category
+    this.activeCategory = category.category
     if (view === 'products') {
       this.getProducts(category); // Obtener productos de la categoría seleccion
     }

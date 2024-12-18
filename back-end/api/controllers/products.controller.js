@@ -41,7 +41,7 @@ class ProductsController {
             const pageSize = parseInt(req.query.pageSize) || 10; // Tamaño de la página
             const orderBy = req.query.orderBy || 'product'; // Columna por la que ordenar (por defecto 'product')
             const orderDirection = req.query.orderDirection || 'asc'; // Dirección del orden (por defecto 'asc')
-            const { category } = req.params; // Categoría de los productos
+            const { categoryId } = req.params; // Categoría de los productos
 
             const skip = (page - 1) * pageSize; // Calcular el valor de OFFSET
             const limit = pageSize; // Límite de productos por página
@@ -50,7 +50,7 @@ class ProductsController {
             const { data: products, error, count } = await supabase
                 .from('products')
                 .select('*', { count: 'exact' }) // Obtener el número exacto de productos
-                .contains('categories', [category]) // Filtrar por la categoría especificada
+                .contains('categories_id', [categoryId]) // Filtrar por la categoría especificada
                 .order(orderBy, { ascending: orderDirection === 'asc' }) // Ordenar por la columna y dirección especificadas
                 .range(skip, skip + limit - 1); // Obtener el rango de productos para la página
 

@@ -91,11 +91,11 @@ async function scrapeWebsiteProducts() {
         // Agrupar productos por nombre y categorías
         const finalProducts = groupProductsByCategory(products, categorizedProducts);
 
-        // Iniciar sesión en Firebase
+/*         // Iniciar sesión en Firebase
         await loginUser(email, password);
 
         // Subir imágenes a Firebase Storage
-        await uploadProductImages(finalProducts);
+        await uploadProductImages(finalProducts); */
 
         // Insertar productos nuevos en la base de datos
         await insertNewProducts(finalProducts);
@@ -117,7 +117,7 @@ async function getCategorizedProducts(categories) {
             const { data } = await axios.get(`${category.url_page}?page=${i}`);
             const $ = cheerio.load(data);
             const pageProducts = await getProductsFromPage($, category.url_page);
-            pageProducts.forEach(product => categorizedProducts.push({ ...product, category: category.category }));
+            pageProducts.forEach(product => categorizedProducts.push({ ...product, categoryId: category.id }));
         }
     }
     return categorizedProducts;
@@ -137,7 +137,7 @@ function groupProductsByCategory(products, categorizedProducts) {
                 categories: new Set(),
             };
         }
-        groupedProducts[item.product].categories.add(item.category);
+        groupedProducts[item.product].categories.add(item.categoryId);
     });
 
     products.forEach(item => {
@@ -147,7 +147,7 @@ function groupProductsByCategory(products, categorizedProducts) {
                 price: item.price,
                 image: item.image,
                 url: item.url,
-                categories: new Set(['Sin Categoría']),
+                categories: new Set([13]),
             };
         }
     });
