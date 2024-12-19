@@ -1,19 +1,6 @@
 <div class="card card-outline-secondary my-4" [ngStyle]="{'display': isLoading ? 'none' : 'block'}">
     <h5 class="card-header">Reportes de productos</h5>
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-6">
-                <label for="fechaInicio">Fecha de inicio</label>
-                <input type="date" class="form-control" id="fechaInicio">
-            </div>
-            <div class="col-md-6">
-                <label for="fechaFin">Fecha de fin</label>
-                <input type="date" class="form-control" id="fechaFin">
-            </div>
-        </div>
-        <br>
-        <button class="btn btn-primary">Generar reporte</button>
-        <canvas baseChart></canvas>
     </div>
 </div>
 <div class="loader-container" [ngStyle]="{ 'display': isLoading ? 'flex' : 'none' }">

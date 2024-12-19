@@ -9,7 +9,6 @@ import { ApiService } from '../../services/api.service';
   styleUrl: './navbar.component.scss'
 })
 export class NavbarComponent {
-  logoUrl: string = '';
   @Input() isLoading: boolean = false;
   @Output() changeLoading: EventEmitter<boolean> = new EventEmitter<boolean>();
 
@@ -17,14 +16,7 @@ export class NavbarComponent {
 
   ngOnInit() {
     setTimeout(() => {
-      this.getLogoUrl();
       this.changeLoading.emit(false);
     }, 1000)
-  }
-
-  getLogoUrl() {
-    this.apiService.getLogo('logo', 'alogar-logo').subscribe((data: any) => {
-      this.logoUrl = data.url;
-    })
   }
 }

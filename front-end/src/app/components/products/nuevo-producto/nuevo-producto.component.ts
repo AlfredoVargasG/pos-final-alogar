@@ -12,21 +12,21 @@ import { ApiService } from '../../../services/api.service';
 export class NuevoProductoComponent {
   productForm: FormGroup;
 
-  // Lista de categorías disponibles
   categories: any[] = [];
   isLoading: boolean = true;
+  isSubmitting: boolean = false;
 
   constructor(
     private builder: FormBuilder,
     private apiService: ApiService
   ) {
-    // Inicializamos el formulario con un array vacío para las categorías seleccionadas
     this.productForm = this.builder.group({
       product: ['', Validators.required],
       price: [null, Validators.required],
       image: [null, Validators.required],
       url: ['', Validators.required],
-      categories: [[]]
+      categories: [[]],
+      principal_category_id: [null, Validators.required],
     });
   }
 
@@ -54,7 +54,7 @@ export class NuevoProductoComponent {
     const categories = this.productForm.get('categories')?.value;
 
     if (category.selected) {
-      categories.push(category.category);
+      categories.push(category.id);
     } else {
       const index = categories.findIndex((cat: any) => cat.id === category.id);
       if (index > -1) {
@@ -63,28 +63,16 @@ export class NuevoProductoComponent {
     }
 
     this.productForm.get('categories')?.setValue(categories);
-  }
-
-  onImageChange(event: any): void {
-    const file = event.target.files[0];
-    if (file) {
-      this.productForm.patchValue({
-        image: file
-      });
-    }
+    this.productForm.get('principal_category_id')?.setValue(categories[0]);
   }
 
   onSubmit() {
-    const formData = this.productForm.value;
-    this.apiService.uploadProductImage(formData.image).subscribe((data: any) => {
-      const product = {
-        ...this.productForm.value,
-        image: data.body.url
-      }
-
-      this.apiService.ingresarProducto(product).subscribe((data: any) => {
-        console.log(data);
-      })
-    })
+    if (this.productForm.valid) {
+      this.isSubmitting = true;
+      this.apiService.ingresarProducto(this.productForm.value).subscribe((data: any) => {
+        console.log('Producto creado correctamente', data);
+        this.isSubmitting = false;
+      });
+    }
   }
 }

@@ -2,17 +2,10 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 require('dotenv').config(); // Cargar variables de entorno
 const { supabase } = require('../supabaseClient');
-const { ref, uploadBytes, getDownloadURL } = require('firebase/storage');
-const { storage } = require('../firebase/firebase');
-const loginUser = require('../firebase/loginFirebase');
-const multer = require('multer');
 
 const email = process.env.FIREBASE_EMAIL;
 const password = process.env.FIREBASE_PASSWORD;
 const url = process.env.URL_SCRAPPING_PRODUCTS; // URL a la que se hará scraping
-
-// Configura multer para manejar la subida de imágenes
-const upload = multer({ storage: multer.memoryStorage() });
 
 // Función para obtener las URLs de las categorías
 async function getUrlsOfCategories() {
@@ -91,12 +84,6 @@ async function scrapeWebsiteProducts() {
         // Agrupar productos por nombre y categorías
         const finalProducts = groupProductsByCategory(products, categorizedProducts);
 
-/*         // Iniciar sesión en Firebase
-        await loginUser(email, password);
-
-        // Subir imágenes a Firebase Storage
-        await uploadProductImages(finalProducts); */
-
         // Insertar productos nuevos en la base de datos
         await insertNewProducts(finalProducts);
 
@@ -164,18 +151,6 @@ function groupProductsByCategory(products, categorizedProducts) {
     }));
 }
 
-// Función para subir las imágenes de los productos a Firebase Storage
-async function uploadProductImages(products) {
-    for (let product of products) {
-        const imageFile = await axios.get(product.image, { responseType: 'arraybuffer' });
-        const storageRef = ref(storage, `productos/${product.product}.jpg`);
-        const snapshot = await uploadBytes(storageRef, imageFile.data, {
-            contentType: 'image/jpeg',
-        });
-        product.image = await getDownloadURL(snapshot.ref);
-    }
-}
-
 // Función para insertar los productos nuevos en la base de datos
 async function insertNewProducts(products) {
     const { data: newProductsInDB, error } = await supabase.from('products').insert(products).select();
@@ -186,4 +161,4 @@ async function insertNewProducts(products) {
     console.log('Productos insertados en la base de datos', newProductsInDB.length);
 }
 
-module.exports = { scrapeWebsiteProducts, upload };
+module.exports = { scrapeWebsiteProducts };

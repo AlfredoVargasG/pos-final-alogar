@@ -55,6 +55,26 @@ class ProductsController {
             return res.status(500).json({ message: 'Error al obtener los productos' });
         }
     }
+
+    async addProduct(req, res) {
+        try {
+            const { product, price, image, url, categories_id, principal_category_id } = req.body;
+
+            let { data } = await supabase.from('products').insert({
+                product,
+                price,
+                image,
+                url,
+                categories_id,
+                principal_category_id,
+            });
+
+            return res.status(201).send(data);
+        } catch (error) {
+            console.error('Error al agregar un producto:', error);
+            return res.status(500).json({ message: 'Error al agregar un producto' });
+        }
+    }
 }
 
 module.exports = { ProductsController };
