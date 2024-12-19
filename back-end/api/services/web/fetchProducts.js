@@ -109,14 +109,15 @@ async function scrapeWebsiteProducts() {
 async function getCategorizedProducts(categories) {
     const categorizedProducts = [];
     for (let category of categories) {
-        const { data } = await axios.get(category.url_page);
+        if(category.url === '') continue;
+        const { data } = await axios.get(category.url);
         const $ = cheerio.load(data);
         const pages = await getPagesCount($);
 
         for (let i = 1; i <= pages; i++) {
-            const { data } = await axios.get(`${category.url_page}?page=${i}`);
+            const { data } = await axios.get(`${category.url}?page=${i}`);
             const $ = cheerio.load(data);
-            const pageProducts = await getProductsFromPage($, category.url_page);
+            const pageProducts = await getProductsFromPage($, category.url);
             pageProducts.forEach(product => categorizedProducts.push({ ...product, categoryId: category.id }));
         }
     }
@@ -159,7 +160,7 @@ function groupProductsByCategory(products, categorizedProducts) {
 
     return Object.values(groupedProducts).map(product => ({
         ...product,
-        category_id: product.categories_id[0],
+        principal_category_id: product.categories_id[0],
     }));
 }
 

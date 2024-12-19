@@ -14,16 +14,14 @@ export class HistorialProductosComponent {
   constructor(private apiService: ApiService) {}
 
   ngOnInit() {
-    this.getHistorialProductos();
+    this.getHistoricalProductsByMonth();
   }
 
-  getHistorialProductos() {
+  getHistoricalProductsByMonth() {
     this.isLoading = true;
-    this.apiService.getHistoricalProducts().subscribe((res: any) => {
-      console.log(res);
-      setTimeout(() => {
-        this.isLoading = false;
-      }, 2000);
+    this.apiService.getHistoricalProductsByMonth().subscribe((data: any) => {
+      console.log(data);
+      this.isLoading = false;
     })
   }
 }

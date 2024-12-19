@@ -42,13 +42,13 @@ async function scrapeWebsiteCategories() {
             cantCategories++;
         
             const category = $(element).find('.collection-grid-item__title.h3').text().trim().toLowerCase();
-            const url_page = $(element).find('.collection-grid-item__link').attr('href').replace('/', 'https://alogar.cl/');
+            const url = $(element).find('.collection-grid-item__link').attr('href').replace('/', 'https://alogar.cl/');
             const image = $(element).find('.collection-grid-item__overlay').attr('data-bgset').split(' ')[0].replace('//', 'https://');
             
-            categories.push({ category, url_page, image });
+            categories.push({ category, url, image });
         });
         
-        if(cantCategories === categoriesInDB.length){
+        if(cantCategories + 1 === categoriesInDB.length){
             console.log('No hay nuevas categorías');
             return;
         }
@@ -58,6 +58,8 @@ async function scrapeWebsiteCategories() {
 
         // Subir imágenes a Firebase Storage
         await uploadProductImages(categories);
+
+        categories.push({ category: 'Otros', url: '', image: '' });
 
         const { data: newCategoriesDB, error } = await supabase.from('categories').insert(categories);
 

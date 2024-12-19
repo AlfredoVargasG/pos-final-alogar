@@ -1,126 +1,58 @@
-const { supabase } = require('../services/supabaseClient')
+const { supabase } = require('../services/supabaseClient');
 
 class ProductsController {
     async getProducts(req, res) {
         try {
-            const page = parseInt(req.query.page) || 1; // Página actual
-            const pageSize = parseInt(req.query.pageSize) || 10; // Tamaño de la página
-            const orderBy = req.query.orderBy || 'product'; // Columna por la que ordenar (por defecto 'product')
-            const orderDirection = req.query.orderDirection || 'asc'; // Dirección del orden (por defecto 'asc')
+            const { page, pageSize, orderBy, orderDirection } = req.query;
 
-            const skip = (page - 1) * pageSize; // Calcular el valor de OFFSET
-            const limit = pageSize; // Límite de productos por página
+            // Obtiene las categorías y sus productos asociados
+            let { data: categories } = await supabase
+                .from('categories')
+                .select('id, category, products(id, product, price, image, url)');
 
-            // Realizamos la consulta con orden y paginación
-            const { data: products, error, count } = await supabase
-                .from('products')
-                .select('*', { count: 'exact' }) // Obtener el número exacto de productos
-                .order(orderBy, { ascending: orderDirection === 'asc' }) // Ordenar por la columna y dirección especificadas
-                .range(skip, skip + limit - 1); // Obtener el rango de productos para la página
+            // Actualiza las categorías que no tienen productos asociados
+            const fetchProductsForEmptyCategories = async (category) => {
+                if (category.products.length === 0) {
+                    const { data } = await supabase
+                        .from('products')
+                        .select('id, product, price, image, url')
+                        .contains('categories_id', [category.id]);
+                    category.products = data || [];
+                }
+                return category;
+            };
 
-            if (error) {
-                console.error('Error al obtener los productos:', error);
-                return res.status(500).json({ message: 'Error al obtener los productos' });
+            categories = await Promise.all(categories.map(fetchProductsForEmptyCategories));
+
+            // Ordena los productos si se especifican `orderBy` y `orderDirection`
+            if (orderBy && orderDirection) {
+                const sortProducts = (a, b) => 
+                    orderDirection === 'asc'
+                        ? typeof(a[orderBy]) === 'string' ? a[orderBy].localeCompare(b[orderBy]) : a[orderBy] - b[orderBy]
+                        : b[orderBy] - a[orderBy];
+
+                categories = categories.map(category => ({
+                    ...category,
+                    products: [...category.products].sort(sortProducts),
+                    totalProducts: category.products.length
+                }));
             }
 
-            return res.status(200).json({
-                data: products,
-                totalCount: count, // Devuelve el total de productos
-                page,
-                pageSize,
-            });
+            // Pagina los productos si se especifican `page` y `pageSize`
+            if (page && pageSize) {
+                const start = (page - 1) * pageSize;
+                const end = start + Number(pageSize);
+
+                categories = categories.map(category => ({
+                    ...category,
+                    products: category.products.slice(start, end),
+                }));
+            }
+
+            return res.status(200).json({ products: categories, totalProducts: categories.totalProducts });
         } catch (error) {
             console.error('Error al obtener los productos:', error);
             return res.status(500).json({ message: 'Error al obtener los productos' });
-        }
-    }
-
-    async getProductsByCategory(req, res) {
-        try {
-            const page = parseInt(req.query.page) || 1; // Página actual
-            const pageSize = parseInt(req.query.pageSize) || 10; // Tamaño de la página
-            const orderBy = req.query.orderBy || 'product'; // Columna por la que ordenar (por defecto 'product')
-            const orderDirection = req.query.orderDirection || 'asc'; // Dirección del orden (por defecto 'asc')
-            const { categoryId } = req.params; // Categoría de los productos
-
-            const skip = (page - 1) * pageSize; // Calcular el valor de OFFSET
-            const limit = pageSize; // Límite de productos por página
-
-            // Realizamos la consulta con orden y paginación
-            const { data: products, error, count } = await supabase
-                .from('products')
-                .select('*', { count: 'exact' }) // Obtener el número exacto de productos
-                .contains('categories_id', [categoryId]) // Filtrar por la categoría especificada
-                .order(orderBy, { ascending: orderDirection === 'asc' }) // Ordenar por la columna y dirección especificadas
-                .range(skip, skip + limit - 1); // Obtener el rango de productos para la página
-
-            if (error) {
-                console.error('Error al obtener los productos:', error);
-                return res.status(500).json({ message: 'Error al obtener los productos' });
-            }
-
-            return res.status(200).json({
-                data: products,
-                totalCount: count, // Devuelve el total de productos
-                page,
-                pageSize,
-            });
-        } catch (error) {
-            console.error('Error al obtener los productos por categoría:', error);
-            return res.status(500).json({ message: 'Error al obtener los productos por categoría' });
-        }
-    }
-
-    async getProductByName(req, res) {
-        try {
-            const { product, categoryId } = req.params;
-
-            const { data: products, error } = await supabase.from('products').select('*').contains('categories_id', [categoryId]).like('product', `%${product}%`);
-
-            if (error) {
-                console.error('Error al obtener los productos por nombre:', error);
-                return res.status(500).json({ message: 'Error al obtener los productos por nombre' });
-            }
-
-            return res.status(200).json(products);
-        } catch (error) {
-            console.error('Error al obtener los productos por nombre:', error);
-            return res.status(500).json({ message: 'Error al obtener los productos por nombre' });
-        }
-    }
-
-    async getHistoricalProducts(req, res) {
-        try {
-            const { data, error } = await supabase.rpc('get_products_sales_left_join');
-
-
-            if (error) {
-                console.error('Error al obtener los productos históricos:', error);
-                return res.status(500).json({ message: 'Error al obtener los productos históricos' });
-            }
-
-            res.status(200).json({ data });
-        } catch (error) {
-            console.error('Error al obtener los productos históricos:', error);
-            return res.status(500).json({ message: 'Error al obtener los productos históricos' });
-        }
-    }
-
-    async addProduct(req, res) {
-        try {
-            const { body } = req;
-
-            const { data, error } = await supabase.from('products').insert(body).select('*').eq('product', body.product);
-
-            if (error) {
-                console.error('Error al agregar un producto:', error);
-                return res.status(500).json({ message: 'Error al agregar un producto' });
-            }
-
-            return res.status(201).json(data);
-        } catch (error) {
-            console.error('Error al agregar un producto:', error);
-            return res.status(500).json({ message: 'Error al agregar un producto' });
         }
     }
 }
