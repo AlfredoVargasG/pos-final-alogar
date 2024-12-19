@@ -1,7 +1,6 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../components/navbar/navbar.component';
-import { ProductsComponent } from '../components/products/products.component';
 import { NuevoProductoComponent } from '../components/products/nuevo-producto/nuevo-producto.component';
 import { TodosProductosComponent } from '../components/products/todos-productos/todos-productos.component';
 import { HistorialProductosComponent } from '../components/products/historial-productos/historial-productos.component';
@@ -38,7 +37,6 @@ export class HomeComponent {
     { 
       title: 'Producto', 
       isActive: false, 
-      component: ProductsComponent,
       items: [
         { title: 'Nuevo Producto', isActive: true, component: NuevoProductoComponent },
         { title: 'Productos', isActive: false, component: TodosProductosComponent },

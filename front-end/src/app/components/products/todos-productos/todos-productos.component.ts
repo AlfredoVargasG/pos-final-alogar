@@ -12,8 +12,9 @@ import { CardProductoComponent } from './card-producto/card-producto.component';
 export class TodosProductosComponent {
   isLoadingProducts: boolean = true;
   isLoadingCategories: boolean = true;
+  isSearching: boolean = false;
   view: string = 'categories'; // Vista activa ('categories' o 'products')
-  activeCategory: string = ''; // Categoría activa
+  activeCategoryId: number = 0; // Categoría activa
   products: any[] = []; // Productos de la página actual
   categories: any[] = []; // Categorías
   totalProducts: number = 0; // Total de productos (desde el backend)
@@ -30,9 +31,9 @@ export class TodosProductosComponent {
   }
 
   // Método para obtener productos con paginación
-  getProducts(category: any) {
+  getProducts(category: number) {
     this.isLoadingProducts = true; // Activar el loader
-    this.apiService.getProductsByCategory(category.id, this.page, this.pageSize, this.orderBy, this.orderDirection).subscribe((res: any) => {
+    this.apiService.getProductsByCategory(category, this.page, this.pageSize, this.orderBy, this.orderDirection).subscribe((res: any) => {
       this.products = res.data;
       this.totalProducts = res.totalCount; // Total de productos
       setTimeout(() => {
@@ -54,16 +55,16 @@ export class TodosProductosComponent {
 
   changeView(view: string, category: any) {
     this.view = view;
-    this.activeCategory = category.category
+    this.activeCategoryId = category.id
     if (view === 'products') {
-      this.getProducts(category); // Obtener productos de la categoría seleccion
+      this.getProducts(category.id); // Obtener productos de la categoría seleccion
     }
   }
 
   // Manejar el cambio de página
   onPageChange(newPage: number) {
     this.page = newPage;
-    this.getProducts(this.activeCategory); // Obtener productos para la nueva página
+    this.getProducts(this.activeCategoryId); // Obtener productos para la nueva página
   }
 
   sortProducts(sortBy: string) {
@@ -73,7 +74,18 @@ export class TodosProductosComponent {
       this.orderBy = sortBy;
       this.orderDirection = 'asc';
     }
-    this.getProducts(this.activeCategory); // Obtener productos ordenados
+    this.getProducts(this.activeCategoryId); // Obtener productos ordenados
+  }
+
+  searchProducts(searchTerm: any) {
+    this.isSearching = true; // Activar el loader
+    this.apiService.searchProducts(searchTerm.target.value, this.activeCategoryId, this.page, this.pageSize).subscribe((res: any) => {
+      this.products = res;
+      this.totalProducts = res.length; // Total de productos
+      setTimeout(() => {
+        this.isSearching = false; // Desactivar el loader
+      }, 1000); // Simular tiempo de carga
+    });
   }
 
   onViewChange(view: string): void {

@@ -36,6 +36,14 @@ export class ApiService {
     return this.http.get(`${this.url}/products/category/${categoryId}?page=${page}&pageSize=${pageSize}&orderBy=${orderBy}&orderDirection=${orderDirection}`);
   }
 
+  searchProducts(search: string, category: number ,page: number, pageSize: number) {
+    return this.http.get(`${this.url}/products/search/${search}/category/${category}?page=${page}&pageSize=${pageSize}`);
+  }
+
+  getHistoricalProducts(){
+    return this.http.get(`${this.url}/products/historical`);
+  }
+
   ingresarProducto(producto: any) {
     return this.http.post(`${this.url}/products`, producto);
   }

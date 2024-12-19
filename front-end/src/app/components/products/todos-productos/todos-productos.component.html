@@ -16,14 +16,19 @@
     </div>
 
     <!-- Sección de Productos -->
-    <div class="products-view" [ngStyle]="{ 'display': view === 'products' && !isLoadingProducts ? 'block' : 'none' }">
-        <div class="card-header">
-            Todos los productos
+    <div class="flex-column align-items-center"
+        [ngStyle]="{ 'display': view === 'products' && !isLoadingProducts ? 'flex' : 'none' }">
+        <div class="card-header d-flex align-items-center justify-content-between w-100">
+            <span>Todos los Productos</span>
+            <a class="btn btn-sm btn-outline-secondary"
+                (click)="changeView('categories', { activeCategoryId : activeCategoryId})">
+                Regresar a Categorías
+            </a>
         </div>
         <div class="card-body">
             <!-- Caja de búsqueda -->
             <div class="search-box">
-                <input type="text" placeholder="Buscar productos..." />
+                <input type="text" placeholder="Buscar productos..." (input)="searchProducts($event)" />
             </div>
 
             <!-- Opciones de Vista -->
@@ -38,50 +43,57 @@
                 </span>
             </div>
 
-            <!-- Vista de Cuadrícula -->
-            <div class="grid-products" *ngIf="activeView === 'grid_view'">
-                <div class="product-grid">
-                    <app-card-producto *ngFor="let producto of products" [producto]="producto"></app-card-producto>
+            <div [ngStyle]="{ 'display': isSearching ? 'none' : 'flex' }" class="flex-column">
+                <!-- Vista de Cuadrícula -->
+                <div class="grid-products" *ngIf="activeView === 'grid_view'">
+                    <div class="product-grid">
+                        <app-card-producto *ngFor="let producto of products" [producto]="producto"></app-card-producto>
+                    </div>
+                </div>
+
+                <!-- Vista de Lista -->
+                <div class="table-products" *ngIf="activeView === 'list'">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th></th>
+                                <th>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        Producto
+                                        <span class="material-icons" (click)="sortProducts('product')">swap_vert</span>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        Precio
+                                        <span class="material-icons" (click)="sortProducts('price')">swap_vert</span>
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        Página web
+                                        <span class="material-icons" (click)="sortProducts('url')">swap_vert</span>
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr *ngFor="let product of products">
+                                <td><img [src]="product.image" alt="Imagen del producto" /></td>
+                                <td>{{ product.product }}</td>
+                                <td>{{ product.price | currency }}</td>
+                                <td><a [href]="product.url" target="_blank">{{ product.url }}</a></td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
-            <!-- Vista de Lista -->
-            <div class="table-products" *ngIf="activeView === 'list'">
-                <table>
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>
-                                <div class="d-flex align-items-center justify-content-between">
-                                    Producto
-                                    <span class="material-icons" (click)="sortProducts('product')">swap_vert</span>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="d-flex align-items-center justify-content-between">
-                                    Precio
-                                    <span class="material-icons" (click)="sortProducts('price')">swap_vert</span>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="d-flex align-items-center justify-content-between">
-                                    Página web
-                                    <span class="material-icons" (click)="sortProducts('url')">swap_vert</span>
-                                </div>
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr *ngFor="let product of products">
-                            <td><img [src]="product.image" alt="Imagen del producto" /></td>
-                            <td>{{ product.product }}</td>
-                            <td>{{ product.price | currency }}</td>
-                            <td><a [href]="product.url" target="_blank">{{ product.url }}</a></td>
-                        </tr>
-                    </tbody>
-                </table>
+            <div class="loader-container" [ngStyle]="{ 'display': isSearching ? 'flex' : 'none' }">
+                <div class="loader"></div>
             </div>
-
+        </div>
+        <div class="card-footer">
             <!-- Paginación -->
             <ngb-pagination [collectionSize]="totalProducts" [(page)]="page" [pageSize]="pageSize" [maxSize]="5"
                 [rotate]="true" [boundaryLinks]="true" (pageChange)="onPageChange($event)">

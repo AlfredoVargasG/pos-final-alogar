@@ -73,9 +73,9 @@ class ProductsController {
 
     async getProductByName(req, res) {
         try {
-            const { product } = req.params;
+            const { product, categoryId } = req.params;
 
-            const { data: products, error } = await supabase.from('products').select('*').like('product', `%${product}%`);
+            const { data: products, error } = await supabase.from('products').select('*').contains('categories_id', [categoryId]).like('product', `%${product}%`);
 
             if (error) {
                 console.error('Error al obtener los productos por nombre:', error);
@@ -86,6 +86,23 @@ class ProductsController {
         } catch (error) {
             console.error('Error al obtener los productos por nombre:', error);
             return res.status(500).json({ message: 'Error al obtener los productos por nombre' });
+        }
+    }
+
+    async getHistoricalProducts(req, res) {
+        try {
+            const { data, error } = await supabase.rpc('get_products_sales_left_join');
+
+
+            if (error) {
+                console.error('Error al obtener los productos históricos:', error);
+                return res.status(500).json({ message: 'Error al obtener los productos históricos' });
+            }
+
+            res.status(200).json({ data });
+        } catch (error) {
+            console.error('Error al obtener los productos históricos:', error);
+            return res.status(500).json({ message: 'Error al obtener los productos históricos' });
         }
     }
 
