@@ -2,9 +2,6 @@ const axios = require('axios');
 const cheerio = require('cheerio');
 require('dotenv').config(); // Cargar variables de entorno
 const { supabase } = require('../supabaseClient');
-
-const email = process.env.FIREBASE_EMAIL;
-const password = process.env.FIREBASE_PASSWORD;
 const url = process.env.URL_SCRAPPING_PRODUCTS; // URL a la que se hará scraping
 
 // Función para obtener las URLs de las categorías
@@ -61,31 +58,39 @@ async function scrapeWebsiteProducts() {
         const { data } = await axios.get(url);
         const $ = cheerio.load(data);
 
-        const totalProducts = Number($('.filters-toolbar__product-count').text().trim().split(' ')[0]);
-        if(totalProducts === productsInDb.length) {
-            console.log('No hay nuevos productos');
+        if (productsInDb.length !== 0) {
+            const pages = await getPagesCount($);
+            const products = await getProductsFromPage($, url);
+            const newProducts = products.filter(product => !productsInDb.some(p => p.product === product.product));
+            if (newProducts.length === 0) {
+                console.log('No hay productos nuevos');
+                return;
+            }
+            const categorizedProducts = await getCategorizedProducts(await getUrlsOfCategories());
+            const finalProducts = groupProductsByCategory(newProducts, categorizedProducts);
+            await insertNewProducts(finalProducts);
             return;
+        } else {
+            const pages = await getPagesCount($);
+
+            const products = [];
+            for (let i = 1; i <= pages; i++) {
+                const { data } = await axios.get(`${url}?page=${i}`);
+                const $ = cheerio.load(data);
+                const pageProducts = await getProductsFromPage($, url);
+                products.push(...pageProducts);
+            }
+
+            // Obtener las URLs de las categorías
+            const categories = await getUrlsOfCategories();
+            const categorizedProducts = await getCategorizedProducts(categories);
+
+            // Agrupar productos por nombre y categorías
+            const finalProducts = groupProductsByCategory(products, categorizedProducts);
+
+            // Insertar productos nuevos en la base de datos
+            await insertNewProducts(finalProducts);
         }
-
-        const pages = await getPagesCount($);
-
-        const products = [];
-        for (let i = 1; i <= pages; i++) {
-            const { data } = await axios.get(`${url}?page=${i}`);
-            const $ = cheerio.load(data);
-            const pageProducts = await getProductsFromPage($, url);
-            products.push(...pageProducts);
-        }
-
-        // Obtener las URLs de las categorías
-        const categories = await getUrlsOfCategories();
-        const categorizedProducts = await getCategorizedProducts(categories);
-
-        // Agrupar productos por nombre y categorías
-        const finalProducts = groupProductsByCategory(products, categorizedProducts);
-
-        // Insertar productos nuevos en la base de datos
-        await insertNewProducts(finalProducts);
 
     } catch (error) {
         console.error('Error al hacer scraping de los productos:', error);
@@ -96,7 +101,7 @@ async function scrapeWebsiteProducts() {
 async function getCategorizedProducts(categories) {
     const categorizedProducts = [];
     for (let category of categories) {
-        if(category.url === '') continue;
+        if (category.url === '') continue;
         const { data } = await axios.get(category.url);
         const $ = cheerio.load(data);
         const pages = await getPagesCount($);

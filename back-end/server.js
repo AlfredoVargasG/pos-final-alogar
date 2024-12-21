@@ -1,5 +1,5 @@
 const express = require('express');
-const scrapeWebsiteCategories = require('./api/services/web/fetchCategories');
+const {scrapeWebsiteCategories} = require('./api/services/web/fetchCategories');
 const {scrapeWebsiteProducts} = require('./api/services/web/fetchProducts');
 require('dotenv').config(); // Cargar variables de entorno
 const routes = require('./api/routes');
