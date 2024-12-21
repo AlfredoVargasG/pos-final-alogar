@@ -5,12 +5,13 @@ import { ApiService } from '../../../services/api.service';
 
 @Component({
   selector: 'app-historial-productos',
-  imports: [CommonModule, BaseChartDirective],
+  imports: [CommonModule],
   templateUrl: './historial-productos.component.html',
   styleUrl: './historial-productos.component.scss'
 })
 export class HistorialProductosComponent {
   isLoading = false;
+  products: any[] = [];
   constructor(private apiService: ApiService) {}
 
   ngOnInit() {
@@ -19,8 +20,8 @@ export class HistorialProductosComponent {
 
   getHistoricalProductsByMonth() {
     this.isLoading = true;
-    this.apiService.getHistoricalProductsByMonth().subscribe((data: any) => {
-      console.log(data);
+    this.apiService.getHistoricalProducts().subscribe((data: any) => {
+      this.products = data;
       this.isLoading = false;
     })
   }

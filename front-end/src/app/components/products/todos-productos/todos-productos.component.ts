@@ -65,14 +65,14 @@ export class TodosProductosComponent {
   }
 
   searchProducts(searchTerm: any) {
-    this.isSearching = true;
+/*     this.isSearching = true;
     this.apiService.searchProducts(searchTerm.target.value, this.activeCategoryId, this.page, this.pageSize).subscribe((res: any) => {
       this.products = res;
       this.totalProducts = res.length;
       setTimeout(() => {
         this.isSearching = false;
       }, 1000);
-    });
+    }); */
   }
 
   sortProducts(orderBy: string) {

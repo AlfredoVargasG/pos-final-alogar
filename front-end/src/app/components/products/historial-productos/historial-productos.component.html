@@ -1,6 +1,26 @@
-<div class="card card-outline-secondary my-4" [ngStyle]="{'display': isLoading ? 'none' : 'block'}">
+<div class="card card-outline-secondary my-4" [ngStyle]="{ 'display': isLoading ? 'none' : 'block' }">
     <h5 class="card-header">Reportes de productos</h5>
     <div class="card-body">
+        <table class="styled-table">
+            <thead>
+                <tr>
+                    <th>Producto</th>
+                    <th>Cliente</th>
+                    <th>Cantidad</th>
+                    <th>Precio</th>
+                    <th>Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let product of products">
+                    <td>{{ product.product }}</td>
+                    <td>{{ product.client_name }}</td>
+                    <td>{{ product.cant_product }}</td>
+                    <td>{{ product.price | currency }}</td>
+                    <td>{{ product.total | currency }}</td>
+                </tr>
+            </tbody>
+        </table>
     </div>
 </div>
 <div class="loader-container" [ngStyle]="{ 'display': isLoading ? 'flex' : 'none' }">

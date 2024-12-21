@@ -75,6 +75,47 @@ class ProductsController {
             return res.status(500).json({ message: 'Error al agregar un producto' });
         }
     }
+
+    async getProductByName(req, res) {
+        try {
+            const { product } = req.params;
+
+            let { data } = await supabase
+                .from('products')
+                .select('id, product, price, image, url')
+                .ilike('product', `%${product}%`);
+            
+            return res.status(200).json(data);
+        } catch (error) {
+            console.error('Error al buscar un producto por nombre:', error);
+            return res.status(500).json({ message: 'Error al buscar un producto por nombre' });
+        }
+    }
+
+    async getHistoricalProducts(req, res) {
+        try {
+            let { data } = await supabase
+                .from('products_sales')
+                .select('id_product, cant_product, products(id, product, price, image, url), sales(id, total, id_client)')
+
+            let { data: client } = await supabase
+                .from('clients')
+                .select('id, name')
+
+            data = data.map(d => {
+                const { id_product, cant_product, products, sales } = d;
+                const { product, price, image, url } = products;
+                const { total, id_client } = sales;
+                const { name } = client.find(c => c.id === id_client);
+                return { id_product, cant_product, product, price, image, url, total, client_name : name };
+            });
+
+            return res.status(200).json(data);
+        } catch (error) {
+            console.error('Error al obtener los productos históricos:', error);
+            return res.status(500).json({ message: 'Error al obtener los productos históricos' });
+        }
+    }
 }
 
 module.exports = { ProductsController };
