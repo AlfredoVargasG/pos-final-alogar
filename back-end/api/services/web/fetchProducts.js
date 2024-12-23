@@ -180,6 +180,9 @@ async function scrapeWebsiteProducts() {
                 let categorizedProducts = await getCategorizedProducts(categories);
                 let groupedProducts = groupProductsByCategory(newProducts, categorizedProducts);
                 await insertNewProducts(groupedProducts);
+            }else {
+                console.log('No hay nuevos productos');
+                return;
             }
         }
 
