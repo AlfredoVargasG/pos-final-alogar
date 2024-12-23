@@ -4,6 +4,7 @@ import { NavbarComponent } from '../components/navbar/navbar.component';
 import { NuevoProductoComponent } from '../components/products/nuevo-producto/nuevo-producto.component';
 import { TodosProductosComponent } from '../components/products/todos-productos/todos-productos.component';
 import { HistorialProductosComponent } from '../components/products/historial-productos/historial-productos.component';
+import { NuevaVentaComponent } from '../components/ventas/nueva-venta/nueva-venta.component';
 
 interface PageItem {
   title: string;
@@ -31,8 +32,10 @@ export class HomeComponent {
   pages: Page[] = [
     { 
       title: 'Venta', 
-      isActive: true, 
-      items: this.createItems(['Nueva Venta', 'Historial de Ventas']) 
+      isActive: true,
+      items: [
+        { title: 'Nueva Venta', isActive: true, component: NuevaVentaComponent },
+      ]
     },
     { 
       title: 'Producto', 
@@ -56,11 +59,6 @@ export class HomeComponent {
     setTimeout(() => {
       this.isLoading = false;
     }, 3000);
-  }
-
-  // Método auxiliar para crear items con el primer activo
-  private createItems(titles: string[]): PageItem[] {
-    return titles.map((title, index) => ({ title, isActive: index === 0 }));
   }
 
   // Cambia la página activa y resetea los subitems

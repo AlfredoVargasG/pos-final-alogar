@@ -25,12 +25,12 @@ export class ApiService {
     return this.http.get(`${this.url}/products${params}`);
   }
 
-  searchProducts(search: string, category: number ,page: number, pageSize: number) {
-    return this.http.get(`${this.url}/products/search/${search}/category/${category}?page=${page}&pageSize=${pageSize}`);
+  getHistoricalProducts(){
+    return this.http.get(`${this.url}/products/historical`);
   }
 
-  getHistoricalProductsByMonth(){
-    return this.http.get(`${this.url}/products/historical`);
+  searchProductByCode(code: any) {
+    return this.http.get(`${this.url}/products/search/${code}`);
   }
 
   ingresarProducto(producto: any) {

@@ -7,7 +7,7 @@ let ProductsCtrl = new ProductsController();
 // Define routes for product operations
 router.get('/', ProductsCtrl.getProducts);
 router.post('/', ProductsCtrl.addProduct);
-router.get('/search/:product', ProductsCtrl.getProductByName)
+router.get('/search/:code', ProductsCtrl.getProductByCode)
 router.get('/historical', ProductsCtrl.getHistoricalProducts)
 /*
 router.get('/search/:product/category/:categoryId', ProductsCtrl.getProductByName)

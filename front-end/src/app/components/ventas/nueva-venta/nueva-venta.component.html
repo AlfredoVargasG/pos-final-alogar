@@ -1,0 +1,15 @@
+<div class="card card-outline-secondary my-4">
+    <div class="card">
+        <div class="card-header">
+            Detalle de venta
+        </div>
+        <div class="card-body">
+            <div class="code-input">
+                <label>Code Product</label>
+                <input type="text" class="form-control" placeholder="Code Product" (input)="searchProductByCode($event)">
+            </div>
+            <form [formGroup]="salesForm">             
+            </form>
+        </div>
+    </div>
+</div>

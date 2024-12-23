@@ -76,14 +76,14 @@ class ProductsController {
         }
     }
 
-    async getProductByName(req, res) {
+    async getProductByCode(req, res) {
         try {
-            const { product } = req.params;
+            const { code } = req.params;
 
             let { data } = await supabase
                 .from('products')
                 .select('id, product, price, image, url')
-                .ilike('product', `%${product}%`);
+                .eq('code', code);
             
             return res.status(200).json(data);
         } catch (error) {
