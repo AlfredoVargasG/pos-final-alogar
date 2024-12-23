@@ -7,12 +7,13 @@ const path = require('path');
 
 // Configuración de rutas y URL
 const url = process.env.URL_SCRAPPING_PRODUCTS;
-const excelPath = path.join(__dirname, '../excel', 'codigos_productos.xlsx');
+const excelPath = path.join(__dirname, '../excel', 'alogar_table_productos.xlsx');
+const excelPathSuppliers = path.join(__dirname, '../excel', 'suppliers.xlsx');
 
 // Obtener códigos de productos desde el archivo Excel
-async function getCodesOfProducts() {
+async function getExcelData(path) {
     try {
-        const products = readExcel(excelPath);
+        const products = readExcel(path);
         return products.sort((a, b) => a['nombre'].localeCompare(b['nombre']));
     } catch (error) {
         console.error('Error al obtener los códigos de los productos:', error);
@@ -110,7 +111,7 @@ async function getCategorizedProducts(categories) {
             const { data } = await axios.get(`${category.url}?page=${i}`);
             const $ = cheerio.load(data);
             const pageProducts = getProductsFromPage($, category.url);
-            categorizedProducts.push(...pageProducts.map(product => ({ ...product, principal_category_id: category.id })));
+            categorizedProducts.push(...pageProducts.map(product => ({ ...product, categoryId: category.id })));
         }
     }
     return categorizedProducts;
@@ -165,32 +166,47 @@ async function scrapeWebsiteProducts() {
         const $ = cheerio.load(data);
         const pages = getPagesCount($);
 
-        const products = [];
+        let products = [];
         for (let i = 1; i <= pages; i++) {
             const { data } = await axios.get(`${url}?page=${i}`);
             const $ = cheerio.load(data);
             products.push(...getProductsFromPage($, url));
         }
 
-        const categories = await getUrlsOfCategories();
-        const categorizedProducts = await getCategorizedProducts(categories);
+        if(productsInDb.length !== 0) {
+            const newProducts = products.filter(product => !productsInDb.some(productInDb => productInDb.product === product.product));
+            if (newProducts.length > 0) {
+                let categories = await getUrlsOfCategories();
+                let categorizedProducts = await getCategorizedProducts(categories);
+                let groupedProducts = groupProductsByCategory(newProducts, categorizedProducts);
+                await insertNewProducts(groupedProducts);
+            }
+        }
+
+        let categories = await getUrlsOfCategories();
+        let categorizedProducts = await getCategorizedProducts(categories);
         let groupedProducts = groupProductsByCategory(products, categorizedProducts);
 
-        const productCodes = await getCodesOfProducts();
+        let productCodes = await getExcelData(excelPath);
+        let { data: suppliers } = await supabase.from('suppliers').select('*');
         let relaciones = relacionarListas(groupedProducts, productCodes, 0.3);
 
-        groupedProducts = groupedProducts.map(product => {
-            return {
-                ...product,
-                code_product: relaciones.find(relacion => relacion.producto1.product === product.product)?.coincidencia?.codigobarra || '',
-            }
+        let newProducts = relaciones
+            .map(relacion => ({
+                ...relacion.producto1,
+                code_product: relacion.coincidencia !== null ? relacion.coincidencia.codigobarra.toString() : null,
+                id_supplier: relacion.coincidencia !== null ? suppliers.find(supplier => supplier.nombre === relacion.coincidencia.proveedor)?.id || null : null,
+            }));
+
+        newProducts = newProducts.map(product => {
+            const { categoryId, ...rest } = product;
+            return rest;
         })
 
-        const newProducts = groupedProducts.filter(product => !productsInDb.some(productInDb => productInDb.product === product.product));
-        if(newProducts.length > 0) await insertNewProducts(newProducts);
+        await insertNewProducts(newProducts);
     } catch (error) {
         console.error('Error durante el scraping:', error);
     }
 }
 
-module.exports = { scrapeWebsiteProducts };
+module.exports = { scrapeWebsiteProducts, getExcelData };

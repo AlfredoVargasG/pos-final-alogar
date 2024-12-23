@@ -1,6 +1,7 @@
 const express = require('express');
-const {scrapeWebsiteCategories} = require('./api/services/web/fetchCategories');
-const {scrapeWebsiteProducts} = require('./api/services/web/fetchProducts');
+const { scrapeWebsiteCategories } = require('./api/services/web/fetchCategories');
+const { scrapeWebsiteProducts } = require('./api/services/web/fetchProducts');
+const { getSuppliers } = require('./api/services/web/fetchSuppliers');
 require('dotenv').config(); // Cargar variables de entorno
 const routes = require('./api/routes');
 const cors = require('cors');
@@ -15,6 +16,8 @@ app.use(cors()); // Habilitar CORS
 const executeScrapingTasks = async () => {
     try {
         await scrapeWebsiteCategories(); // Espera que termine el scraping de categorías
+
+        await getSuppliers(); // Espera que termine de obtener los proveedores
 
         await scrapeWebsiteProducts(); // Espera que termine el scraping de productos
     } catch (error) {
